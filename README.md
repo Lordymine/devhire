@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DevHire
 
-## Getting Started
+**Plataforma de match entre desenvolvedores e empresas**
 
-First, run the development server:
+🔗 **Live Demo:** [https://github.com/Lordymine/devhire](https://github.com/Lordymine/devhire)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🎯 O que é?
+
+DevHire é uma plataforma que conecta desenvolvedores com empresas de forma inteligente, similar ao Tinder mas para recrutamento tech.
+
+### Funcionalidades
+
+- 🔐 **Autenticação**: Login com Google ou email/senha (NextAuth)
+- 👤 **Perfis**: Devs criam perfis com skills, experiência e pretensão salarial
+- 🏢 **Empresas**: Cadastram vagas com requisitos e localização
+- 💚 **Match**: Sistema de likes mútuos entre devs e empresas
+- 💬 **Descoberta**: Feed personalizado baseado em skills e preferências
+
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|--------|-----------|
+| **Frontend** | Next.js 16, React 19, Tailwind CSS v4, shadcn/ui |
+| **Backend** | Next.js API Routes, Server Actions |
+| **Banco** | PostgreSQL + Prisma ORM |
+| **Auth** | NextAuth.js v5 |
+| **Testes** | Vitest (54 testes) |
+
+## 🏗️ Arquitetura
+
+### Clean Architecture
+
+```
+src/
+├── domains/           # Lógica de negócio pura
+│   ├── user/         # User, DevProfile, CompanyProfile
+│   ├── match/        # Likes, Matches
+│   └── job/          # Vagas
+├── app/api/          # API Routes
+├── app/              # Frontend pages
+├── lib/repositories/ # Implementações Prisma
+└── components/ui/    # shadcn/ui components
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Como rodar
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Clone
+git clone https://github.com/Lordymine/devhire.git
+cd devhire
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Instalar dependências
+npm install
 
-## Learn More
+# Configurar variáveis de ambiente
+cp .env.example .env
+# Editar .env com suas credenciais
 
-To learn more about Next.js, take a look at the following resources:
+# Rodar migrações
+npx prisma migrate dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Iniciar desenvolvimento
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📝 Variáveis de Ambiente
 
-## Deploy on Vercel
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/devhire"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret"
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ✅ Testes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Rodar testes
+npm test
+
+# Build de produção
+npm run build
+```
+
+**Status:** 54/54 testes passando ✅
+
+## 📊 Estrutura do Banco
+
+### Principais Tabelas
+
+- **users**: Dados de autenticação (NextAuth)
+- **dev_profiles**: Perfil de desenvolvedores
+- **company_profiles**: Perfil de empresas
+- **jobs**: Vagas publicadas
+- **likes**: Curtidas (dev ↔ empresa)
+- **matches**: Matches mútuos
+
+## 🎯 Próximos Passos
+
+- [ ] Deploy na Vercel
+- [ ] WebSocket para notificações em tempo real
+- [ ] Sistema de chat entre matches
+- [ ] Upload de imagens (Cloudinary)
+- [ ] Analytics dashboard
+
+---
+
+**Desenvolvido com:** Clean Architecture + TDD + PREVC workflow
