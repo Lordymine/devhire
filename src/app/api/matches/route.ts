@@ -33,7 +33,6 @@ export async function GET() {
               website: true,
               industry: true,
               location: true,
-              userId: true,
             },
           },
         },
@@ -68,7 +67,6 @@ export async function GET() {
               skills: true,
               experience: true,
               location: true,
-              userId: true,
               user: {
                 select: {
                   name: true,

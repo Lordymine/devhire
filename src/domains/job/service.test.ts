@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { JobService } from './service';
 import { MockJobRepository } from './repository.mock';
 import { MockCompanyProfileRepository } from '../user/repository.mock';
-import { ValidationError, NotFoundError, UnauthorizedError } from '../shared/errors';
+import { ValidationError, NotFoundError } from '../shared/errors';
 
 describe('JobService', () => {
   let service: JobService;
@@ -200,12 +200,12 @@ describe('JobService', () => {
 
   describe('listActive', () => {
     beforeEach(async () => {
-      const job1 = await service.create(companyId, {
+      await service.create(companyId, {
         title: 'Active Job 1',
         description: 'Description 1',
         type: 'CLT',
       });
-      const job2 = await service.create(companyId, {
+      await service.create(companyId, {
         title: 'Active Job 2',
         description: 'Description 2',
         type: 'PJ',

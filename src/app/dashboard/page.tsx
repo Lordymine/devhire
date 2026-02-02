@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Briefcase, Users, Heart } from "lucide-react";
 import { JobList } from "./job-list";
 import { JobForm } from "./job-form";

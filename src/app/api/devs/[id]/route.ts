@@ -32,7 +32,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
           select: {
             id: true,
             name: true,
-            email: true,
             image: true,
           },
         },
@@ -46,7 +45,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       dev: {
         id: devProfile.id,
-        userId: devProfile.userId,
         title: devProfile.title,
         bio: devProfile.bio,
         skills: devProfile.skills,
@@ -99,7 +97,6 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
           select: {
             id: true,
             name: true,
-            email: true,
             image: true,
           },
         },
@@ -109,7 +106,6 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       dev: {
         id: updatedProfile.id,
-        userId: updatedProfile.userId,
         title: updatedProfile.title,
         bio: updatedProfile.bio,
         skills: updatedProfile.skills,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,8 +27,6 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ defaultType }: RegisterFormProps) {
-  const [userType, setUserType] = useState<"dev" | "company">(defaultType);
-
   const [devState, devFormAction, isDevPending] = useActionState<RegisterState, FormData>(
     registerDev,
     { error: "" }
@@ -41,7 +39,6 @@ export function RegisterForm({ defaultType }: RegisterFormProps) {
   return (
     <Tabs
       defaultValue={defaultType}
-      onValueChange={(v) => setUserType(v as "dev" | "company")}
     >
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="dev">Sou Dev</TabsTrigger>

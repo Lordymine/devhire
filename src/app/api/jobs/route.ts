@@ -34,6 +34,12 @@ export async function GET(req: NextRequest) {
     const salaryMin = searchParams.get('salaryMin');
     const salaryMax = searchParams.get('salaryMax');
 
+    const parseOptionalInt = (value: string | null) => {
+      if (!value) return undefined;
+      const parsed = Number.parseInt(value, 10);
+      return Number.isNaN(parsed) ? undefined : parsed;
+    };
+
     const where: Record<string, unknown> = { status: 'active' };
 
     if (skills && skills.length > 0) {
@@ -45,11 +51,13 @@ export async function GET(req: NextRequest) {
     if (location) {
       where.location = { contains: location, mode: 'insensitive' };
     }
-    if (salaryMin) {
-      where.salaryMax = { gte: parseInt(salaryMin, 10) };
+    const minValue = parseOptionalInt(salaryMin);
+    const maxValue = parseOptionalInt(salaryMax);
+    if (minValue !== undefined) {
+      where.salaryMax = { gte: minValue };
     }
-    if (salaryMax) {
-      where.salaryMin = { lte: parseInt(salaryMax, 10) };
+    if (maxValue !== undefined) {
+      where.salaryMin = { lte: maxValue };
     }
 
     const jobs = await prisma.job.findMany({

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { UserService } from './service';
 import { MockUserRepository, MockDevProfileRepository, MockCompanyProfileRepository } from './repository.mock';
-import { ValidationError, ConflictError, NotFoundError } from '../shared/errors';
+import { ValidationError, ConflictError } from '../shared/errors';
 
 describe('UserService', () => {
   let service: UserService;

@@ -9,6 +9,16 @@ export type JobFormState = {
   error: string;
 };
 
+const parseOptionalInt = (value: FormDataEntryValue | null) => {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  const parsed = Number.parseInt(trimmed, 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+const allowedStatuses = new Set(["active", "paused", "closed"]);
+
 export async function createJob(
   prevState: JobFormState,
   formData: FormData
@@ -33,8 +43,8 @@ export async function createJob(
   const requirementsRaw = formData.get("requirements") as string | null;
   const location = formData.get("location") as string | null;
   const remote = formData.get("remote") === "on";
-  const salaryMin = formData.get("salaryMin") as string | null;
-  const salaryMax = formData.get("salaryMax") as string | null;
+  const salaryMinValue = parseOptionalInt(formData.get("salaryMin"));
+  const salaryMaxValue = parseOptionalInt(formData.get("salaryMax"));
   const type = formData.get("type") as string;
 
   if (!title || !description || !type) {
@@ -48,6 +58,17 @@ export async function createJob(
     ? requirementsRaw.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
+  if (
+    salaryMinValue !== undefined &&
+    salaryMaxValue !== undefined &&
+    salaryMinValue > salaryMaxValue
+  ) {
+    return {
+      success: false,
+      error: "O salario minimo deve ser menor ou igual ao salario maximo",
+    };
+  }
+
   try {
     await prisma.job.create({
       data: {
@@ -58,8 +79,8 @@ export async function createJob(
         requirements,
         location: location || undefined,
         remote,
-        salaryMin: salaryMin ? parseInt(salaryMin, 10) : undefined,
-        salaryMax: salaryMax ? parseInt(salaryMax, 10) : undefined,
+        salaryMin: salaryMinValue,
+        salaryMax: salaryMaxValue,
         type,
       },
     });
@@ -86,6 +107,10 @@ export async function updateJobStatus(jobId: string, status: string) {
     return { success: false, error: "Perfil de empresa nao encontrado" };
   }
 
+  if (!allowedStatuses.has(status)) {
+    return { success: false, error: "Status invalido" };
+  }
+
   try {
     await prisma.job.update({
       where: {
@@ -96,7 +121,7 @@ export async function updateJobStatus(jobId: string, status: string) {
     });
 
     revalidatePath("/dashboard");
-    return { success: true, error: null };
+    return { success: true, error: "" };
   } catch {
     return { success: false, error: "Erro ao atualizar vaga" };
   }
@@ -126,7 +151,7 @@ export async function deleteJob(jobId: string) {
     });
 
     revalidatePath("/dashboard");
-    return { success: true, error: null };
+    return { success: true, error: "" };
   } catch {
     return { success: false, error: "Erro ao excluir vaga" };
   }

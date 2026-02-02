@@ -9,6 +9,14 @@ export type ProfileState = {
   error: string;
 };
 
+const parseOptionalInt = (value: FormDataEntryValue | null) => {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  const parsed = Number.parseInt(trimmed, 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 export async function updateDevProfile(
   prevState: ProfileState,
   formData: FormData
@@ -27,12 +35,23 @@ export async function updateDevProfile(
   const github = formData.get("github") as string | null;
   const linkedin = formData.get("linkedin") as string | null;
   const location = formData.get("location") as string | null;
-  const salaryMin = formData.get("salaryMin") as string | null;
-  const salaryMax = formData.get("salaryMax") as string | null;
+  const salaryMinValue = parseOptionalInt(formData.get("salaryMin"));
+  const salaryMaxValue = parseOptionalInt(formData.get("salaryMax"));
 
   const skills = skillsRaw
     ? skillsRaw.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
+
+  if (
+    salaryMinValue !== undefined &&
+    salaryMaxValue !== undefined &&
+    salaryMinValue > salaryMaxValue
+  ) {
+    return {
+      success: false,
+      error: "O salario minimo deve ser menor ou igual ao salario maximo",
+    };
+  }
 
   try {
     await prisma.devProfile.upsert({
@@ -46,8 +65,8 @@ export async function updateDevProfile(
         github: github || undefined,
         linkedin: linkedin || undefined,
         location: location || undefined,
-        salaryMin: salaryMin ? parseInt(salaryMin, 10) : undefined,
-        salaryMax: salaryMax ? parseInt(salaryMax, 10) : undefined,
+        salaryMin: salaryMinValue,
+        salaryMax: salaryMaxValue,
       },
       create: {
         userId: session.user.id,
@@ -59,8 +78,8 @@ export async function updateDevProfile(
         github: github || undefined,
         linkedin: linkedin || undefined,
         location: location || undefined,
-        salaryMin: salaryMin ? parseInt(salaryMin, 10) : undefined,
-        salaryMax: salaryMax ? parseInt(salaryMax, 10) : undefined,
+        salaryMin: salaryMinValue,
+        salaryMax: salaryMaxValue,
       },
     });
 

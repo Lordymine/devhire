@@ -18,9 +18,6 @@ export class JobService {
     }
 
     // Verify company exists by checking if there's a profile with this ID
-    const companyExists = await this.companyProfileRepo.findByUserId(companyId);
-    // Since companyId in this context refers to the profile ID, we need to check differently
-    // Let's verify by attempting to create - the repository will have the company
     const allProfiles = await this.findCompanyById(companyId);
     if (!allProfiles) {
       throw new NotFoundError('Company', companyId);
