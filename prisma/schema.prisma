@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  name          String?
+  image         String?
+  password      String?   // For credentials login
+  accounts      Account[]
+  sessions      Session[]
+
+  // DevHire specific fields
+  type          UserType  @default(DEV)
+  devProfile    DevProfile?
+  companyProfile CompanyProfile?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+enum UserType {
+  DEV
+  COMPANY
+}
+
+model DevProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title       String?
+  bio         String?
+  skills      String[] // Array de skills
+  experience  String? // anos de experiência
+  portfolio   String? // URL do portfolio
+  github      String?
+  linkedin    String?
+  location    String?
+  salaryMin   Int?     @map("salary_min")
+  salaryMax   Int?     @map("salary_max")
+  currency    String   @default("BRL")
+  
+  likes       Like[]   @relation("DevLikes")
+  matches     Match[]  @relation("DevMatches")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("dev_profiles")
+}
+
+model CompanyProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  website     String?
+  logo        String?
+  size        String?  // startup, small, medium, large, enterprise
+  industry    String?
+  location    String?
+  
+  jobs        Job[]
+  likes       Like[]   @relation("CompanyLikes")
+  matches     Match[]  @relation("CompanyMatches")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("company_profiles")
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  companyId   String   @map("company_id")
+  company     CompanyProfile @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String
+  requirements String[]
+  skills      String[]
+  location    String?
+  remote      Boolean  @default(false)
+  salaryMin   Int?     @map("salary_min")
+  salaryMax   Int?     @map("salary_max")
+  currency    String   @default("BRL")
+  type        String   // CLT, PJ, Freelance
+  status      String   @default("active") // active, paused, closed
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("jobs")
+}
+
+model Like {
+  id          String   @id @default(cuid())
+  
+  // Quem deu o like
+  fromDevId   String?  @map("from_dev_id")
+  fromDev     DevProfile? @relation("DevLikes", fields: [fromDevId], references: [id])
+  
+  fromCompanyId String? @map("from_company_id")
+  fromCompany   CompanyProfile? @relation("CompanyLikes", fields: [fromCompanyId], references: [id])
+  
+  // Quem recebeu o like
+  toDevId     String?  @map("to_dev_id")
+  toCompanyId String?  @map("to_company_id")
+  
+  // Tipo: dev->company ou company->dev
+  type        String   // dev_to_company, company_to_dev
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([fromDevId, toCompanyId, type])
+  @@unique([fromCompanyId, toDevId, type])
+  @@map("likes")
+}
+
+model Match {
+  id          String   @id @default(cuid())
+  
+  devId       String   @map("dev_id")
+  dev         DevProfile @relation("DevMatches", fields: [devId], references: [id])
+  
+  companyId   String   @map("company_id")
+  company     CompanyProfile @relation("CompanyMatches", fields: [companyId], references: [id])
+  
+  status      String   @default("active") // active, closed
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([devId, companyId])
+  @@map("matches")
+}
